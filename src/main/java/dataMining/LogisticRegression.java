@@ -45,7 +45,7 @@ public class LogisticRegression {
     private HashMap<String,Integer> labels;
 
     /**
-     * 上述map表的反向索引
+     * 上述 map表的反向索引
      */
     private HashMap<Integer,String> reverse;
 
