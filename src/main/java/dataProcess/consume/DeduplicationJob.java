@@ -28,8 +28,8 @@ public class DeduplicationJob {
         job.setInputFormatClass(TextInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);
 
-        job.setMapOutputKeyClass(Deduplication.Key.class);
-        job.setMapOutputValueClass(Deduplication.Record.class);
+        job.setMapOutputKeyClass(Key.class);
+        job.setMapOutputValueClass(Record.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
 

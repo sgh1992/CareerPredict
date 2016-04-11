@@ -18,93 +18,6 @@ import org.apache.hadoop.mapreduce.Reducer;
  */
 public class Deduplication {
 
-
-    static class Key implements WritableComparable<Key> {
-
-        private String studentID;
-        private String time;
-
-        public Key(){}
-
-        public Key(String studentID, String time){
-            this.studentID = studentID;
-            this.time = time;
-        }
-
-        public int compareTo(Key o) {
-            if(studentID.compareTo(o.studentID) == 0)
-                return time.compareTo(o.time);
-            else
-                return studentID.compareTo(o.studentID);
-        }
-
-        /**
-         * 注意需要重写equals与 hashCode方法.
-         * @param o
-         * @return
-         */
-        public boolean equals(Key o){
-            if(compareTo(o) == 0)
-                return true;
-            return false;
-        }
-
-        public int hashCode(){
-            return (studentID.hashCode() * 127 + time.hashCode());
-        }
-
-        public void write(DataOutput dataOutput) throws IOException {
-
-            dataOutput.writeUTF(studentID);
-            dataOutput.writeUTF(time);
-        }
-
-        public void readFields(DataInput dataInput) throws IOException {
-            this.studentID = dataInput.readUTF();
-            this.time = dataInput.readUTF();
-        }
-
-    }
-
-    static class Record implements Writable{
-
-        private String place;
-        private String deviceID;
-        private String time;
-        private double amount;
-        private double balance;
-
-        public Record(){}
-
-        public Record(String place, String deviceID, String time, double amount, double balance){
-            this.place = place;
-            this.deviceID = deviceID;
-            this.time = time;
-            this.amount = amount;
-            this.balance = balance;
-        }
-
-        public void write(DataOutput dataOutput) throws IOException {
-            dataOutput.writeUTF(place);
-            dataOutput.writeUTF(deviceID);
-            dataOutput.writeUTF(time);
-            dataOutput.writeDouble(amount);
-            dataOutput.writeDouble(balance);
-        }
-
-        public void readFields(DataInput dataInput) throws IOException {
-            this.place = dataInput.readUTF();
-            this.deviceID = dataInput.readUTF();
-            this.time = dataInput.readUTF();
-            this.amount = dataInput.readDouble();
-            this.balance = dataInput.readDouble();
-        }
-
-        public String toString(){
-            return new StringBuilder().append(place).append(",").append(deviceID).append(",").append(time).append(",").append(amount).append(",").append(balance).toString();
-        }
-    }
-
     static class KeyPartition extends Partitioner<Key,Record>{
         public int getPartition(Key key, Record record, int numPartitions) {
             return Math.abs(key.studentID.hashCode() * 127) % numPartitions;
@@ -135,6 +48,15 @@ public class Deduplication {
             parser = new ConsumeRecordParser();
         }
 
+        /**
+         * 需要特别注意,Map阶段,一次只有一条记录在内存中,而且一个分片中的多条记录是共享一个实例对象的
+         * 所以当在外部引用了一Key or Value 实例时，在后续的操作中，随着分片记录地进行,Key or Value中的值是会发生变化的.
+         * @param key
+         * @param value
+         * @param context
+         * @throws IOException
+         * @throws InterruptedException
+         */
         public void map(LongWritable key,Text value,Context context) throws IOException, InterruptedException {
             parser.parser(value.toString());
             if(parser.unMatched()) {
@@ -159,20 +81,30 @@ public class Deduplication {
     }
 
     static class DeReduce extends Reducer<Key,Record,Text,Text>{
-
+        /**
+         * Iterable中的所有对象共享一个实例,这点非常值得注意
+         * 因此，只要确保单个的Key Value 不会超过内存空间的大小即可.
+         * @param key
+         * @param iterable
+         * @param context
+         * @throws IOException
+         * @throws InterruptedException
+         */
         public void reduce(Key key, Iterable<Record> iterable, Context context) throws IOException, InterruptedException {
             String studentID = key.studentID;
             Iterator<Record> iterator = iterable.iterator();
-            Record beforeRecord = iterator.next();
+            /**
+             * 注意，这里需要深度复制.
+             */
+            Record beforeRecord = new Record(iterator.next());
             /**
              * 根据同一个ID，同一个时间点的策略消除重复的记录.
              */
             while(iterator.hasNext()){
                 Record curRecord = iterator.next();
-                if(!beforeRecord.time.equals(curRecord.time)){
+                if(!beforeRecord.time.equals(curRecord.time))
                     context.write(new Text(studentID), new Text(beforeRecord.toString()));
-                }
-                beforeRecord = curRecord;
+                beforeRecord.time = curRecord.time;
             }
             context.write(new Text(studentID), new Text(beforeRecord.toString()));
         }
