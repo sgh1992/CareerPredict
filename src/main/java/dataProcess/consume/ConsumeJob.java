@@ -1,8 +1,12 @@
 package dataProcess.consume;
 
+import dataProcess.consume.record.GraduateStudentsConsumeAndBasicInfoRecord;
+import dataProcess.consume.record.Key;
+import dataProcess.consume.record.Record;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -15,15 +19,16 @@ import java.io.IOException;
 /**
  * Created by sghipr on 4/8/16.
  */
-public class DeduplicationJob {
+public class ConsumeJob {
 
     private static String DuOutPut = "duOutPut";
 
-    public static Path runDeduplicationJob(Path input, Configuration baseConf) throws IOException, ClassNotFoundException, InterruptedException {
+    private static String GraduateStudentsForConsumeAndBasicinfo = "graduateStudentsForConsumeAndBasicInfo";
 
+    public static Path runDeduplicationJob(Path input, Configuration baseConf) throws IOException, ClassNotFoundException, InterruptedException {
         Configuration conf = new Configuration(baseConf);
         Job job = Job.getInstance(conf);
-        job.setJarByClass(DeduplicationJob.class);
+        job.setJarByClass(ConsumeJob.class);
 
         job.setInputFormatClass(TextInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);
@@ -53,4 +58,27 @@ public class DeduplicationJob {
         }
         return output;
     }
+
+    public static Path runGraduateStudentsForConsumeAndBasicInfoJob(Path input,Path studentBasicInfo,Configuration baseConf) throws IOException, ClassNotFoundException, InterruptedException {
+        Configuration conf = new Configuration(baseConf);
+        Job job = Job.getInstance(conf);
+        job.setJarByClass(ConsumeJob.class);
+        job.setMapperClass(ConsumeForGraduatedStudents.GraduatedStudentsMap.class);
+        job.setOutputKeyClass(NullWritable.class);
+        job.setOutputValueClass(GraduateStudentsConsumeAndBasicInfoRecord.class);
+        job.addCacheFile(studentBasicInfo.toUri());
+
+        FileInputFormat.addInputPath(job,input);
+        Path output = new Path(input.getParent(),GraduateStudentsForConsumeAndBasicinfo);
+        FileSystem.get(conf).delete(output,true);
+        FileOutputFormat.setOutputPath(job,output);
+
+        boolean success = job.waitForCompletion(true);
+        while(!success){
+            System.err.println("GraduateStudentsForConsumeAndBasicInfoJob Failes!");
+            System.exit(1);
+        }
+        return output;
+    }
+
 }

@@ -1,9 +1,9 @@
 package dataProcess.consume;
 
+import dataProcess.consume.record.Key;
+import dataProcess.consume.record.Record;
 import org.apache.hadoop.io.*;
 
-import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -20,7 +20,7 @@ public class Deduplication {
 
     static class KeyPartition extends Partitioner<Key,Record>{
         public int getPartition(Key key, Record record, int numPartitions) {
-            return Math.abs(key.studentID.hashCode() * 127) % numPartitions;
+            return Math.abs(key.getStudentID().hashCode() * 127) % numPartitions;
         }
     }
 
@@ -31,7 +31,7 @@ public class Deduplication {
         public int compare(WritableComparable key1, WritableComparable key2){
             Key first = (Key)key1;
             Key second = (Key)key2;
-            return first.studentID.compareTo(second.studentID);
+            return first.getStudentID().compareTo(second.getStudentID());
         }
     }
 
@@ -91,7 +91,7 @@ public class Deduplication {
          * @throws InterruptedException
          */
         public void reduce(Key key, Iterable<Record> iterable, Context context) throws IOException, InterruptedException {
-            String studentID = key.studentID;
+            String studentID = key.getStudentID();
             Iterator<Record> iterator = iterable.iterator();
             /**
              * 注意，这里需要深度复制.
@@ -102,14 +102,31 @@ public class Deduplication {
              */
             while(iterator.hasNext()){
                 Record curRecord = iterator.next();
-                if(!beforeRecord.time.equals(curRecord.time))
+                if(!beforeRecord.getTime().equals(curRecord.getTime()))
                     context.write(new Text(studentID), new Text(beforeRecord.toString()));
-                beforeRecord.time = curRecord.time;
+                beforeRecord.setTime(curRecord.getTime());
             }
             context.write(new Text(studentID), new Text(beforeRecord.toString()));
         }
     }
 
+
+    static class DeduplicationResultRecord{
+
+        protected String studentID;
+        protected Record record;
+
+        public DeduplicationResultRecord(String studentID, Record record){
+            this.studentID = studentID;
+            this.record = record;
+        }
+
+        public DeduplicationResultRecord(String keyRecord){
+            String[] keyAndRecord = keyRecord.split("\t");
+            studentID = keyAndRecord[0];
+            record = new Record(keyAndRecord[1]);
+        }
+    }
 
 
 }

@@ -1,4 +1,4 @@
-package dataProcess.consume;
+package dataProcess.consume.record;
 
 import org.apache.hadoop.io.Writable;
 
@@ -8,17 +8,27 @@ import java.io.IOException;
 
 /**
  * Created by sghipr on 4/11/16.
+ * 消费数据的Record
  */
-public class Record implements Writable{
+public class Record implements Writable {
     protected String place;
     protected String deviceID;
     protected String time;
     protected double amount;
     protected double balance;
 
-    public Record(){}
+    public String getTime(){
+        return  time;
+    }
 
-    public Record(String place, String deviceID, String time, double amount, double balance){
+    public void setTime(String time){
+        this.time = time;
+    }
+
+    public Record() {
+    }
+
+    public Record(String place, String deviceID, String time, double amount, double balance) {
         this.place = place;
         this.deviceID = deviceID;
         this.time = time;
@@ -26,8 +36,8 @@ public class Record implements Writable{
         this.balance = balance;
     }
 
-    public Record(Record o){
-        this(o.place,o.deviceID,o.time,o.amount,o.balance);
+    public Record(Record o) {
+        this(o.place, o.deviceID, o.time, o.amount, o.balance);
     }
 
     public void write(DataOutput dataOutput) throws IOException {
@@ -46,7 +56,16 @@ public class Record implements Writable{
         this.balance = dataInput.readDouble();
     }
 
-    public String toString(){
+    public String toString() {
         return new StringBuilder().append(place).append(",").append(deviceID).append(",").append(time).append(",").append(amount).append(",").append(balance).toString();
+    }
+
+    public Record(String toString){
+        String[] array = toString.split(",", -1);
+        place = array[0];
+        deviceID = array[1];
+        time = array[2];
+        amount = Double.parseDouble(array[3]);
+        balance = Double.parseDouble(array[4]);
     }
 }

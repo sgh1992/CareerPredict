@@ -1,4 +1,4 @@
-package dataProcess.consume;
+package dataProcess.consume.record;
 
 import org.apache.hadoop.io.WritableComparable;
 
@@ -8,12 +8,21 @@ import java.io.IOException;
 
 /**
  * Created by sghipr on 4/11/16.
+ * 消费数据的key
  */
 public class Key implements WritableComparable<Key>{
     protected String studentID;
     protected String time;
 
     public Key(){}
+
+    public String getStudentID(){
+        return studentID;
+    }
+
+    public String getTime(){
+        return time;
+    }
 
     public Key(String studentID, String time){
         this.studentID = studentID;
