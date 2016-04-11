@@ -21,6 +21,8 @@ import java.util.HashMap;
  **/
 public class ConsumeForGraduatedStudents {
 
+    public static String GraduateStudentsForConsumeAndBasicinfo = "graduateStudentsForConsumeAndBasicInfoOutPut";
+
     static class GraduatedStudentsMap extends Mapper<Text,Text,NullWritable,GraduateStudentsConsumeAndBasicInfoRecord>{
         private HashMap<String,GraduateStudentBasicRecord> graduatesInfo;
         public void setup(Context context) throws IOException {
@@ -35,7 +37,7 @@ public class ConsumeForGraduatedStudents {
                 GraduateStudentBasicRecord recordInfo = (GraduateStudentBasicRecord)ReflectionUtils.newInstance(reader.getValueClass(),conf);
                 while(reader.next(nullWritable,recordInfo)){
                     if(!basicRecords.containsKey(recordInfo.getStudentID()))
-                        basicRecords.put(recordInfo.getStudentID().toString(),recordInfo);
+                        basicRecords.put(recordInfo.getStudentID(),recordInfo);
                 }
                 reader.close();
             } catch (IOException e) {

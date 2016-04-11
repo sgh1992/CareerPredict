@@ -17,11 +17,12 @@ public class Driver extends Configured implements Tool {
 
     private static String ORIGIALCONSUMEDATA = "hdfs://Master:9000/user/sghipr/careerPredict/consumeData.csv";
     private static String GraduateStudentsBasicInfo = "hdfs://Master:9000/user/sghipr/careerPredict/graduateworkinfo.csv";
+
     public int run(String[] args) throws Exception {
         Configuration conf = new Configuration();
         setConf(conf);
-        //Path duOutPut = runDeduplicationJob(new Path(ORIGIALCONSUMEDATA),getConf());
-        Path graduateStudentsForConsumeAndBasicInfoPath = runGraduateStudentsForConsumeAndBasicInfoJob("/home/sghipr/careerPredict",dataProcess.tool.Tool.getGraduateStudentsBasicPath(GraduateStudentsBasicInfo),getConf());
+        Path duOutPut = runDeduplicationJob(new Path(ORIGIALCONSUMEDATA),getConf());
+        Path graduateStudentsForConsumeAndBasicInfoPath = runGraduateStudentsForConsumeAndBasicInfoJob(duOutPut,getConf());
         return 0;
     }
 
@@ -29,8 +30,9 @@ public class Driver extends Configured implements Tool {
         return ConsumeJob.runDeduplicationJob(input,conf);
     }
 
-    public Path runGraduateStudentsForConsumeAndBasicInfoJob(Path input,Path graduateBasicInfo,Configuration conf) throws InterruptedException, IOException, ClassNotFoundException {
-        return ConsumeJob.runGraduateStudentsForConsumeAndBasicInfoJob(input,graduateBasicInfo,conf);
+    public Path runGraduateStudentsForConsumeAndBasicInfoJob(Path input,Configuration conf) throws InterruptedException, IOException, ClassNotFoundException {
+        ;
+        return ConsumeJob.runGraduateStudentsForConsumeAndBasicInfoJob(input,new dataProcess.tool.Tool(getConf()).getGraduateStudentsBasicPath(GraduateStudentsBasicInfo),conf);
     }
 
     public static void main(String[] args) throws Exception {

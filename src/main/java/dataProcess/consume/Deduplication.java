@@ -18,6 +18,8 @@ import org.apache.hadoop.mapreduce.Reducer;
  */
 public class Deduplication {
 
+    public static String DuOutPut = "duOutPut";
+
     static class KeyPartition extends Partitioner<Key,Record>{
         public int getPartition(Key key, Record record, int numPartitions) {
             return Math.abs(key.getStudentID().hashCode() * 127) % numPartitions;
@@ -104,7 +106,7 @@ public class Deduplication {
                 Record curRecord = iterator.next();
                 if(!beforeRecord.getTime().equals(curRecord.getTime()))
                     context.write(new Text(studentID), new Text(beforeRecord.toString()));
-                beforeRecord.setTime(curRecord.getTime());
+                beforeRecord = new Record(curRecord);
             }
             context.write(new Text(studentID), new Text(beforeRecord.toString()));
         }

@@ -10,6 +10,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.KeyValueTextInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
@@ -20,10 +21,6 @@ import java.io.IOException;
  * Created by sghipr on 4/8/16.
  */
 public class ConsumeJob {
-
-    private static String DuOutPut = "duOutPut";
-
-    private static String GraduateStudentsForConsumeAndBasicinfo = "graduateStudentsForConsumeAndBasicInfo";
 
     public static Path runDeduplicationJob(Path input, Configuration baseConf) throws IOException, ClassNotFoundException, InterruptedException {
         Configuration conf = new Configuration(baseConf);
@@ -46,7 +43,7 @@ public class ConsumeJob {
         job.setNumReduceTasks(3);
 
         FileInputFormat.addInputPath(job,input);
-        Path output = new Path(input.getParent(),DuOutPut);
+        Path output = new Path(input.getParent(),Deduplication.DuOutPut);
         FileSystem.get(conf).delete(output,true);
         FileOutputFormat.setOutputPath(job,output);
 
@@ -67,9 +64,11 @@ public class ConsumeJob {
         job.setOutputKeyClass(NullWritable.class);
         job.setOutputValueClass(GraduateStudentsConsumeAndBasicInfoRecord.class);
         job.addCacheFile(studentBasicInfo.toUri());
+        job.setInputFormatClass(KeyValueTextInputFormat.class);
+        job.setOutputFormatClass(TextOutputFormat.class);
 
         FileInputFormat.addInputPath(job,input);
-        Path output = new Path(input.getParent(),GraduateStudentsForConsumeAndBasicinfo);
+        Path output = new Path(input.getParent(),ConsumeForGraduatedStudents.GraduateStudentsForConsumeAndBasicinfo);
         FileSystem.get(conf).delete(output,true);
         FileOutputFormat.setOutputPath(job,output);
 

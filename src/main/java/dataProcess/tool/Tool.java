@@ -15,6 +15,10 @@ import java.io.InputStreamReader;
  * Created by sghipr on 11/04/16.
  */
 public class Tool {
+
+
+    private static String graduateWorkSequenceFileOutPut = "graduateStudentsBasicSequenceFile";
+
     /**
      * 毕业学生的基本信息的整条记录.
      */
@@ -57,7 +61,7 @@ public class Tool {
             return validate;
         }
     }
-    private static Configuration conf;
+    private  Configuration conf;
     public Tool(Configuration conf){
         this.conf = conf;
     }
@@ -67,13 +71,14 @@ public class Tool {
      * @param file
      * @return
      */
-    public static Path getGraduateStudentsBasicPath(String file){
+    public Path getGraduateStudentsBasicPath(String file){
         Path path = new Path(file);
+        Path output = new Path(path.getParent(),graduateWorkSequenceFileOutPut);
         try {
             FSDataInputStream inputStream = FileSystem.get(conf).open(path);
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String line = null;
-            SequenceFile.Writer writer = new SequenceFile.Writer(FileSystem.get(conf),conf,path, NullWritable.class,GraduateStudentBasicRecord.class);
+            SequenceFile.Writer writer = new SequenceFile.Writer(FileSystem.get(conf),conf,output, NullWritable.class,GraduateStudentBasicRecord.class);
             while((line = reader.readLine()) != null){
                 BasicRecord basicRecord = new BasicRecord(line);
                 if(basicRecord.isValidate()){
@@ -86,6 +91,6 @@ public class Tool {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return path;
+        return output;
     }
 }
