@@ -8,7 +8,4 @@ import org.apache.hadoop.mapreduce.Mapper;
  **/
 public class consumeForGraduatedStudents {
 
-
-    static class graduatedStudentsMap extends Mapper<Ke>
-
 }
