@@ -22,6 +22,28 @@ public class GraduateStudentBasicRecord implements Writable{
         return studentID;
     }
 
+    public String getNation(){
+        return nation;
+    }
+
+    public String getGender(){
+        return gender;
+    }
+    public String getMajor(){
+        return major;
+    }
+
+    public String getWork(){
+        return  work;
+    }
+    public String getCollege(){
+        return college;
+    }
+
+    public String getPolitical(){
+        return political;
+    }
+
     public GraduateStudentBasicRecord(){}
     public GraduateStudentBasicRecord(String studentID, String gender, String nation, String political, String college, String major, String work){
         this.studentID = studentID;

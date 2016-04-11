@@ -49,13 +49,13 @@ public class GraduateStudentsConsumeAndBasicInfoRecord implements Writable{
 
     public GraduateStudentsConsumeAndBasicInfoRecord(Record consume,GraduateStudentBasicRecord basicRecord){
 
-        this.studentID = basicRecord.studentID;
-        this.nation = basicRecord.nation;
-        this.gender = basicRecord.gender;
-        this.political = basicRecord.political;
-        this.college = basicRecord.college;
-        this.major = basicRecord.major;
-        this.work = basicRecord.work;
+        this.studentID = basicRecord.getStudentID();
+        this.nation = basicRecord.getNation();
+        this.gender = basicRecord.getGender();
+        this.political = basicRecord.getPolitical();
+        this.college = basicRecord.getCollege();
+        this.major = basicRecord.getMajor();
+        this.work = basicRecord.getWork();
 
         this.place = consume.place;
         this.deviceID = consume.deviceID;
