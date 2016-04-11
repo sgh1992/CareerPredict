@@ -18,6 +18,7 @@ import org.apache.hadoop.mapreduce.Reducer;
  */
 public class Deduplication {
 
+
     static class Key implements WritableComparable<Key> {
 
         private String studentID;
@@ -121,8 +122,9 @@ public class Deduplication {
         }
     }
 
-    static enum MISSINGPLACE{
-        PLACEMISSING;
+    static enum MISSING{
+        PLACEMISSING,
+        RECORDMISSING;
     }
 
     static class DeMapper extends Mapper<LongWritable,Text,Key,Record>{
@@ -135,8 +137,12 @@ public class Deduplication {
 
         public void map(LongWritable key,Text value,Context context) throws IOException, InterruptedException {
             parser.parser(value.toString());
+            if(parser.unMatched()) {
+                context.getCounter(MISSING.RECORDMISSING).increment(1);
+                return;
+            }
             if(parser.missingPlace())
-                context.getCounter(MISSINGPLACE.PLACEMISSING).increment(1);
+                context.getCounter(MISSING.PLACEMISSING).increment(1);
             if(!parser.isHead())
                 context.write(getKey(),getRecord());
         }

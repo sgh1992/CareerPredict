@@ -17,7 +17,7 @@ import java.io.IOException;
  */
 public class DeduplicationJob {
 
-    private static String DuOutPut = "/home/sghipr/careerPredict/duOutPut";
+    private static String DuOutPut = "duOutPut";
 
     public static Path runDeduplicationJob(Path input, Configuration baseConf) throws IOException, ClassNotFoundException, InterruptedException {
 
@@ -41,7 +41,7 @@ public class DeduplicationJob {
         job.setNumReduceTasks(3);
 
         FileInputFormat.addInputPath(job,input);
-        Path output = new Path(DuOutPut);
+        Path output = new Path(input.getParent(),DuOutPut);
         FileSystem.get(conf).delete(output,true);
         FileOutputFormat.setOutputPath(job,output);
 

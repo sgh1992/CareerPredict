@@ -14,9 +14,15 @@ public class ConsumeRecordParser {
     protected double amount;
     protected double balance;
     private boolean head = false;
+    private boolean imMatched = false;
 
     public void parser(String line){
         String[] array = line.split(",", -1);
+        if(array.length < 7){
+            imMatched = true;
+            return;
+        }
+        imMatched = false;
         studentID = array[1].trim();
         place = array[3].trim();
         deviceID = array[4].trim();
@@ -39,6 +45,10 @@ public class ConsumeRecordParser {
 
     public boolean isHead(){
         return head;
+    }
+
+    public boolean unMatched(){
+        return imMatched;
     }
 
 

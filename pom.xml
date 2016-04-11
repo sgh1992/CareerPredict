@@ -61,7 +61,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>dataProcess.grade.Driver</mainClass>
+                            <mainClass>dataProcess.consume.Driver</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

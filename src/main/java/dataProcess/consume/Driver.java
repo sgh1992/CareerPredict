@@ -11,7 +11,7 @@ import org.apache.hadoop.util.ToolRunner;
  */
 public class Driver extends Configured implements Tool{
 
-    private static String ORIGIALCONSUMEDATA = "/home/sghipr/careerPredict/consumeData.csv";
+    private static String ORIGIALCONSUMEDATA = "hdfs://Master:9000/user/sghipr/careerPredict/consumeData.csv";
 
     public int run(String[] args) throws Exception {
         Configuration conf = new Configuration();
