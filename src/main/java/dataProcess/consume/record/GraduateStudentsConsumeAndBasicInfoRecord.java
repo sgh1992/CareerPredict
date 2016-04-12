@@ -1,6 +1,7 @@
 package dataProcess.consume.record;
 
 import dataProcess.tool.GraduateStudentBasicRecord;
+import dataProcess.tool.PlaceRecord;
 import org.apache.hadoop.io.Writable;
 
 import java.io.DataInput;
@@ -20,7 +21,9 @@ public class GraduateStudentsConsumeAndBasicInfoRecord implements Writable{
     protected String work;
     protected String college;
 
-    protected String place;
+    protected String transferPlace;
+    protected String kind;
+    protected String position;
     protected String deviceID;
     protected String time;
     protected double amount;
@@ -30,7 +33,7 @@ public class GraduateStudentsConsumeAndBasicInfoRecord implements Writable{
 
     public GraduateStudentsConsumeAndBasicInfoRecord(String studentID,String nation,String gender,
                                                      String political,String college,String major,
-                                                     String place,String deviceID,String time,
+                                                     String transferPlace, String kind, String position,String deviceID,String time,
                                                      double amount,double balance,String work){
         this.studentID = studentID;
         this.nation = nation;
@@ -40,14 +43,16 @@ public class GraduateStudentsConsumeAndBasicInfoRecord implements Writable{
         this.major = major;
         this.work = work;
 
-        this.place = place;
+        this.transferPlace = transferPlace;
+        this.kind = kind;
+        this.position = position;
         this.deviceID = deviceID;
         this.time = time;
         this.amount = amount;
         this.balance = balance;
     }
 
-    public GraduateStudentsConsumeAndBasicInfoRecord(Record consume,GraduateStudentBasicRecord basicRecord){
+    public GraduateStudentsConsumeAndBasicInfoRecord(Record consume, GraduateStudentBasicRecord basicRecord, PlaceRecord place){
 
         this.studentID = basicRecord.getStudentID();
         this.nation = basicRecord.getNation();
@@ -57,7 +62,10 @@ public class GraduateStudentsConsumeAndBasicInfoRecord implements Writable{
         this.major = basicRecord.getMajor();
         this.work = basicRecord.getWork();
 
-        this.place = consume.place;
+        this.transferPlace = place.getTransferPlace();
+        this.kind = place.getKind();
+        this.position = place.getPosition();
+
         this.deviceID = consume.deviceID;
         this.time = consume.time;
         this.amount = consume.amount;
@@ -72,7 +80,9 @@ public class GraduateStudentsConsumeAndBasicInfoRecord implements Writable{
         out.writeUTF(college);
         out.writeUTF(major);
 
-        out.writeUTF(place);
+        out.writeUTF(transferPlace);
+        out.writeUTF(kind);
+        out.writeUTF(position);
         out.writeUTF(deviceID);
         out.writeUTF(time);
         out.writeDouble(amount);
@@ -90,7 +100,9 @@ public class GraduateStudentsConsumeAndBasicInfoRecord implements Writable{
         this.college = in.readUTF();
         this.major = in.readUTF();
 
-        this.place = in.readUTF();
+        this.transferPlace = in.readUTF();
+        this.kind = in.readUTF();
+        this.position = in.readUTF();
         this.deviceID = in.readUTF();
         this.time = in.readUTF();
         this.amount = in.readDouble();
@@ -102,7 +114,8 @@ public class GraduateStudentsConsumeAndBasicInfoRecord implements Writable{
     public String toString(){
         return new StringBuilder().append(studentID).append(",").append(nation).append(",")
                 .append(gender).append(",").append(political).append(",").append(college).append(",")
-                .append(major).append(",").append(place).append(",").append(deviceID).append(",")
+                .append(major).append(",").append(transferPlace).append(",").append(kind).append(",").append(position).append(",")
+                .append(",").append(deviceID).append(",")
                 .append(time).append(",").append(amount).append(",").append(balance).append(",").append(work)
         .toString();
     }
@@ -115,11 +128,13 @@ public class GraduateStudentsConsumeAndBasicInfoRecord implements Writable{
         political = array[3];
         college = array[4];
         major = array[5];
-        place = array[6];
-        deviceID = array[7];
-        time = array[8];
-        amount = Double.parseDouble(array[9]);
-        balance = Double.parseDouble(array[10]);
-        work = array[11];
+        transferPlace = array[6];
+        kind = array[7];
+        position = array[8];
+        deviceID = array[9];
+        time = array[10];
+        amount = Double.parseDouble(array[11]);
+        balance = Double.parseDouble(array[12]);
+        work = array[13];
     }
 }

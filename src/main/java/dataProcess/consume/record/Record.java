@@ -25,6 +25,10 @@ public class Record implements Writable {
         this.time = time;
     }
 
+    public String getPlace(){
+        return place;
+    }
+
     public Record() {
     }
 

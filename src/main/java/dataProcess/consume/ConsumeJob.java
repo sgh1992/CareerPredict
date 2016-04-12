@@ -56,16 +56,22 @@ public class ConsumeJob {
         return output;
     }
 
-    public static Path runGraduateStudentsForConsumeAndBasicInfoJob(Path input,Path studentBasicInfo,Configuration baseConf) throws IOException, ClassNotFoundException, InterruptedException {
+    public static Path runGraduateStudentsForConsumeAndBasicInfoJob(Path input,Path studentBasicInfo,Path placeTransfer,Configuration baseConf) throws IOException, ClassNotFoundException, InterruptedException {
+
         Configuration conf = new Configuration(baseConf);
         Job job = Job.getInstance(conf);
         job.setJarByClass(ConsumeJob.class);
         job.setMapperClass(ConsumeForGraduatedStudents.GraduatedStudentsMap.class);
         job.setOutputKeyClass(NullWritable.class);
         job.setOutputValueClass(GraduateStudentsConsumeAndBasicInfoRecord.class);
-        job.addCacheFile(studentBasicInfo.toUri());
+
         job.setInputFormatClass(KeyValueTextInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);
+
+        job.addCacheFile(studentBasicInfo.toUri());
+        job.addCacheFile(placeTransfer.toUri());
+
+        job.setNumReduceTasks(3);
 
         FileInputFormat.addInputPath(job,input);
         Path output = new Path(input.getParent(),ConsumeForGraduatedStudents.GraduateStudentsForConsumeAndBasicinfo);
