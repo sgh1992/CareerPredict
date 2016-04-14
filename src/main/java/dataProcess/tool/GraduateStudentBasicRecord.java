@@ -54,6 +54,15 @@ public class GraduateStudentBasicRecord implements Writable{
         this.major = major;
         this.work = work;
     }
+
+    /**
+     * 深度复制
+     * @param o
+     */
+    public GraduateStudentBasicRecord(GraduateStudentBasicRecord o){
+        this(o.studentID,o.gender,o.nation,o.political,o.college,o.major,o.work);
+    }
+
     public void write(DataOutput out) throws IOException {
         out.writeUTF(studentID);
         out.writeUTF(gender);

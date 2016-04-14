@@ -114,7 +114,7 @@ public class GraduateStudentsConsumeAndBasicInfoRecord implements Writable{
     public String toString(){
         return new StringBuilder().append(studentID).append(",").append(nation).append(",")
                 .append(gender).append(",").append(political).append(",").append(college).append(",")
-                .append(major).append(",").append(transferPlace).append(",").append(kind).append(",").append(position).append(",")
+                .append(major).append(",").append(transferPlace).append(",").append(kind).append(",").append(position)
                 .append(",").append(deviceID).append(",")
                 .append(time).append(",").append(amount).append(",").append(balance).append(",").append(work)
         .toString();

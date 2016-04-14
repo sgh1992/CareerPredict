@@ -46,7 +46,10 @@ public class ConsumeForGraduatedStudents {
                 GraduateStudentBasicRecord recordInfo = (GraduateStudentBasicRecord)ReflectionUtils.newInstance(reader.getValueClass(),conf);
                 while(reader.next(nullWritable,recordInfo)){
                     if(!basicRecords.containsKey(recordInfo.getStudentID()))
-                        basicRecords.put(recordInfo.getStudentID(),recordInfo);
+                    /**
+                     * 注意，由于hadoop的序列化机制是循环使用同一个实例对象,因此在此处，需要进行深度复制.
+                     */
+                        basicRecords.put(recordInfo.getStudentID(),new GraduateStudentBasicRecord(recordInfo));
                 }
                 reader.close();
             } catch (IOException e) {

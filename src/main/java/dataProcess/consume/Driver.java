@@ -15,15 +15,18 @@ import java.io.*;
  */
 public class Driver extends Configured implements Tool {
 
-    private static String ORIGIALCONSUMEDATA = "hdfs://Master:9000/user/sghipr/careerPredict/consumeData.csv";
-    private static String GraduateStudentsBasicInfo = "hdfs://Master:9000/user/sghipr/careerPredict/graduateworkinfo.csv";
-    private static String ConsumePlace = "hdfs://Master:9000/user/sghipr/careerPredict/consumePlace.csv";
+    /**
+     * 使用默认的hdfs路径,因此不需要指明主机号与端口号.
+     */
+    private static String ORIGIALCONSUMEDATA = "/user/sghipr/careerPredict/consumeData.csv";
+    private static String GraduateStudentsBasicInfo = "/user/sghipr/careerPredict/graduateworkinfo.csv";
+    private static String ConsumePlace = "/user/sghipr/careerPredict/consumePlace.csv";
 
     public int run(String[] args) throws Exception {
         Configuration conf = new Configuration();
         setConf(conf);
         //Path duOutPut = runDeduplicationJob(new Path(ORIGIALCONSUMEDATA),getConf());
-        Path duOutPut = new Path("hdfs://Master:9000/user/sghipr/careerPredict/duOutPut");
+        Path duOutPut = new Path("/user/sghipr/careerPredict/duOutPut");
         Path graduateStudentsForConsumeAndBasicInfoPath = runGraduateStudentsForConsumeAndBasicInfoJob(duOutPut,getConf());
         return 0;
 

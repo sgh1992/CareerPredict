@@ -69,6 +69,17 @@ public class Tool {
         public boolean isValidate(){
             return validate;
         }
+
+        public String toString(){
+
+            return new StringBuilder().append(year).append(",").append(studentID).append(",").append(nation).append(",")
+                    .append(gender).append(",").append(political).append(",").append(birth).append(",").append(major)
+                    .append(",").append(work).append(",").append(workunit).append(",").append(workplace).append(",")
+                    .append(sector).append(",").append(origin).append(",").append(college)
+                    .toString();
+        }
+
+
     }
     private  Configuration conf;
     public Tool(Configuration conf){
@@ -121,7 +132,6 @@ public class Tool {
             String str = null;
             while((str = reader.readLine()) != null){
                 String[] array = placeRule(str);
-                //System.err.println(Arrays.toString(array) + "\t" + str);
                 writer.append(NullWritable.get(),new PlaceRecord(str,array[0],array[1],array[2]));
             }
             reader.close();
