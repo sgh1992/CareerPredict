@@ -3,6 +3,7 @@ package dataProcess.consume.record;
 import dataProcess.tool.GraduateStudentBasicRecord;
 import dataProcess.tool.PlaceRecord;
 import org.apache.hadoop.io.Writable;
+import org.apache.mahout.math.Vector;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -21,6 +22,7 @@ public class GraduateStudentsConsumeAndBasicInfoRecord implements Writable{
     protected String work;
     protected String college;
 
+    protected String type;
     protected String transferPlace;
     protected String kind;
     protected String position;
@@ -29,11 +31,28 @@ public class GraduateStudentsConsumeAndBasicInfoRecord implements Writable{
     protected double amount;
     protected double balance;
 
+    public String getTime(){
+        return time;
+    }
+
+    public String getStudentID(){
+        return studentID;
+    }
+
+    public String getKind(){
+        return kind;
+    }
+
+    public double getAmount(){
+        return amount;
+    }
+
     public GraduateStudentsConsumeAndBasicInfoRecord(){}
 
     public GraduateStudentsConsumeAndBasicInfoRecord(String studentID,String nation,String gender,
                                                      String political,String college,String major,
-                                                     String transferPlace, String kind, String position,String deviceID,String time,
+                                                     String type,String transferPlace, String kind, String position,
+                                                     String deviceID,String time,
                                                      double amount,double balance,String work){
         this.studentID = studentID;
         this.nation = nation;
@@ -43,6 +62,7 @@ public class GraduateStudentsConsumeAndBasicInfoRecord implements Writable{
         this.major = major;
         this.work = work;
 
+        this.type = type;
         this.transferPlace = transferPlace;
         this.kind = kind;
         this.position = position;
@@ -62,6 +82,7 @@ public class GraduateStudentsConsumeAndBasicInfoRecord implements Writable{
         this.major = basicRecord.getMajor();
         this.work = basicRecord.getWork();
 
+        this.type = consume.type;
         this.transferPlace = place.getTransferPlace();
         this.kind = place.getKind();
         this.position = place.getPosition();
@@ -80,6 +101,7 @@ public class GraduateStudentsConsumeAndBasicInfoRecord implements Writable{
         out.writeUTF(college);
         out.writeUTF(major);
 
+        out.writeUTF(type);
         out.writeUTF(transferPlace);
         out.writeUTF(kind);
         out.writeUTF(position);
@@ -100,6 +122,7 @@ public class GraduateStudentsConsumeAndBasicInfoRecord implements Writable{
         this.college = in.readUTF();
         this.major = in.readUTF();
 
+        this.type = in.readUTF();
         this.transferPlace = in.readUTF();
         this.kind = in.readUTF();
         this.position = in.readUTF();
@@ -114,8 +137,8 @@ public class GraduateStudentsConsumeAndBasicInfoRecord implements Writable{
     public String toString(){
         return new StringBuilder().append(studentID).append(",").append(nation).append(",")
                 .append(gender).append(",").append(political).append(",").append(college).append(",")
-                .append(major).append(",").append(transferPlace).append(",").append(kind).append(",").append(position)
-                .append(",").append(deviceID).append(",")
+                .append(major).append(",").append(type).append(",").append(transferPlace).append(",")
+                .append(kind).append(",").append(position).append(",").append(deviceID).append(",")
                 .append(time).append(",").append(amount).append(",").append(balance).append(",").append(work)
         .toString();
     }
@@ -128,13 +151,14 @@ public class GraduateStudentsConsumeAndBasicInfoRecord implements Writable{
         political = array[3];
         college = array[4];
         major = array[5];
-        transferPlace = array[6];
-        kind = array[7];
-        position = array[8];
-        deviceID = array[9];
-        time = array[10];
-        amount = Double.parseDouble(array[11]);
-        balance = Double.parseDouble(array[12]);
-        work = array[13];
+        type = array[6];
+        transferPlace = array[7];
+        kind = array[8];
+        position = array[9];
+        deviceID = array[10];
+        time = array[11];
+        amount = Double.parseDouble(array[12]);
+        balance = Double.parseDouble(array[13]);
+        work = array[14];
     }
 }

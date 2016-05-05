@@ -7,6 +7,7 @@ package dataProcess.consume;
 public class ConsumeRecordParser {
 
     protected String studentID;
+    protected String type;
     protected String place;
     protected String deviceID;
     protected String date;
@@ -24,6 +25,7 @@ public class ConsumeRecordParser {
         }
         imMatched = false;
         studentID = array[1].trim();
+        type = array[2].trim();
         place = array[3].trim();
         deviceID = array[4].trim();
         date = array[5].trim();

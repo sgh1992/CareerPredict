@@ -177,7 +177,7 @@ public class Tool {
                 transferAndClass[2] = "mess";
             }
             else {
-                transferAndClass[0] = place.substring(0, place.indexOf('店') + 1);
+                transferAndClass[0] = place.substring(0, place.indexOf('厅') + 1);
                 transferAndClass[1] = "mess";
                 transferAndClass[2] = "mess";
             }
@@ -209,7 +209,7 @@ public class Tool {
                 transferAndClass[2] = "library";
             }
             else if(place.contains("水吧")){
-                transferAndClass[0] = place.substring(0,place.indexOf('台') + 1);
+                transferAndClass[0] = place.substring(0,place.indexOf('吧') + 1);
                 transferAndClass[1] = "snack";
                 transferAndClass[2] = "library";
             }
@@ -523,7 +523,5 @@ public class Tool {
         }
         return transferAndClass;
     }
-
-
 
 }

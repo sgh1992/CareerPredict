@@ -16,6 +16,7 @@ public class Record implements Writable {
     protected String time;
     protected double amount;
     protected double balance;
+    protected String type;
 
     public String getTime(){
         return  time;
@@ -32,7 +33,9 @@ public class Record implements Writable {
     public Record() {
     }
 
-    public Record(String place, String deviceID, String time, double amount, double balance) {
+    public Record(String type,String place, String deviceID, String time, double amount, double balance) {
+
+        this.type = type;
         this.place = place;
         this.deviceID = deviceID;
         this.time = time;
@@ -41,10 +44,12 @@ public class Record implements Writable {
     }
 
     public Record(Record o) {
-        this(o.place, o.deviceID, o.time, o.amount, o.balance);
+        this(o.type,o.place, o.deviceID, o.time, o.amount, o.balance);
     }
 
     public void write(DataOutput dataOutput) throws IOException {
+
+        dataOutput.writeUTF(type);
         dataOutput.writeUTF(place);
         dataOutput.writeUTF(deviceID);
         dataOutput.writeUTF(time);
@@ -53,6 +58,7 @@ public class Record implements Writable {
     }
 
     public void readFields(DataInput dataInput) throws IOException {
+        this.type = dataInput.readUTF();
         this.place = dataInput.readUTF();
         this.deviceID = dataInput.readUTF();
         this.time = dataInput.readUTF();
@@ -61,15 +67,17 @@ public class Record implements Writable {
     }
 
     public String toString() {
-        return new StringBuilder().append(place).append(",").append(deviceID).append(",").append(time).append(",").append(amount).append(",").append(balance).toString();
+        return new StringBuilder().append(type).append(",").append(place).append(",").append(deviceID).append(",").append(time).append(",").append(amount).append(",").append(balance).toString();
     }
 
     public Record(String toString){
+
         String[] array = toString.split(",", -1);
-        place = array[0];
-        deviceID = array[1];
-        time = array[2];
-        amount = Double.parseDouble(array[3]);
-        balance = Double.parseDouble(array[4]);
+        type = array[0];
+        place = array[1];
+        deviceID = array[2];
+        time = array[3];
+        amount = Double.parseDouble(array[4]);
+        balance = Double.parseDouble(array[5]);
     }
 }

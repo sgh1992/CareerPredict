@@ -58,7 +58,6 @@ public class ConsumeForGraduatedStudents {
             }
             return basicRecords;
         }
-
         public HashMap<String,PlaceRecord> getPlaceTransfer(Path placePath,Configuration conf){
             HashMap<String,PlaceRecord> placeRecords = new HashMap<String, PlaceRecord>();
             try {

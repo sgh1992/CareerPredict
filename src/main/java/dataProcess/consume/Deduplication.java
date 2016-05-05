@@ -78,7 +78,7 @@ public class Deduplication {
         }
 
         public Record getRecord(){
-            return new Record(parser.place,parser.deviceID,new StringBuilder().append(parser.date).append(" ").append(parser.time).toString(),parser.amount,parser.balance);
+            return new Record(parser.type,parser.place,parser.deviceID,new StringBuilder().append(parser.date).append(" ").append(parser.time).toString(),parser.amount,parser.balance);
         }
     }
 
@@ -111,24 +111,20 @@ public class Deduplication {
             context.write(new Text(studentID), new Text(beforeRecord.toString()));
         }
     }
-
-
-    static class DeduplicationResultRecord{
-
-        protected String studentID;
-        protected Record record;
-
-        public DeduplicationResultRecord(String studentID, Record record){
-            this.studentID = studentID;
-            this.record = record;
-        }
-
-        public DeduplicationResultRecord(String keyRecord){
-            String[] keyAndRecord = keyRecord.split("\t");
-            studentID = keyAndRecord[0];
-            record = new Record(keyAndRecord[1]);
-        }
-    }
-
-
+//    static class DeduplicationResultRecord{
+//
+//        protected String studentID;
+//        protected Record record;
+//
+//        public DeduplicationResultRecord(String studentID, Record record){
+//            this.studentID = studentID;
+//            this.record = record;
+//        }
+//
+//        public DeduplicationResultRecord(String keyRecord){
+//            String[] keyAndRecord = keyRecord.split("\t");
+//            studentID = keyAndRecord[0];
+//            record = new Record(keyAndRecord[1]);
+//        }
+//    }
 }

@@ -26,7 +26,8 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="CareerPredict" target="1.5" />
+      <module name="CareerPredict" target="1.7" />
+      <module name="Module2" target="1.5" />
     </bytecodeTargetLevel>
   </component>
 </project>
