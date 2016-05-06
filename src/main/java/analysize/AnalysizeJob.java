@@ -1,17 +1,19 @@
 package analysize;
 
 import analysize.record.KeyPair;
+import analysize.tool.CombineBasicInfo;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
@@ -33,16 +35,18 @@ public class AnalysizeJob {
      **/
     public static String consumePlaceVectorOutPut = "consumePlaceVector";
 
+    public static String uniqueKindPlace = "uniqueKind";
+
+    public static String combineBasicInfoOutPut = "combineBasicInfoOutPut";
+
     public static Job consumePlaceAnalysizeJob(Configuration baseConf, Path input, String startTime, String endTime, String rankYear) throws IOException, ClassNotFoundException, InterruptedException {
 
-        Configuration conf = new Configuration(baseConf);
-        conf.set("startTime",startTime);
-        conf.set("endTime", endTime);
-        conf.set("rankYear", rankYear);
+        Job job = Job.getInstance(baseConf);
+        job.getConfiguration().set("startTime",startTime);
+        job.getConfiguration().set("endTime", endTime);
+        job.getConfiguration().set("rankYear", rankYear);
 
-        Job job = Job.getInstance(conf);
         job.setJarByClass(AnalysizeJob.class);
-
         job.setMapperClass(ConsumePlaceAnalysize.consumePlaceAnalysizeMapper.class);
         job.setReducerClass(ConsumePlaceAnalysize.ConsumePlaceAnalysizeReduce.class);
         job.setCombinerClass(ConsumePlaceAnalysize.ConsumePlaceAnalysizeReduce.class);
@@ -58,7 +62,7 @@ public class AnalysizeJob {
         FileInputFormat.addInputPath(job,input);
 
         Path output = new Path(input.getParent(),consumePlaceAnalysizeOutPut);
-        FileSystem.get(conf).delete(output,true);
+        FileSystem.get(job.getConfiguration()).delete(output,true);
 
         FileOutputFormat.setOutputPath(job, output);
         return job;
@@ -75,11 +79,9 @@ public class AnalysizeJob {
         return FileOutputFormat.getOutputPath(job);
     }
 
-    public static Job consumePlaceCombineJob(Configuration baseConf, Path input, Path consumePlace) throws IOException {
+    public static Job consumePlaceVectorJob(Configuration baseConf, Path input, Path consumePlace) throws IOException {
 
-        Configuration conf = new Configuration(baseConf);
-        Job job = Job.getInstance(conf);
-
+        Job job = Job.getInstance(baseConf);
         job.setJarByClass(AnalysizeJob.class);
         job.addCacheFile(consumePlace.toUri());
 
@@ -99,7 +101,7 @@ public class AnalysizeJob {
 
         job.setNumReduceTasks(3);
         Path output = new Path(input.getParent(), consumePlaceVectorOutPut);
-        FileSystem.get(conf).delete(output, true);
+        FileSystem.get(job.getConfiguration()).delete(output, true);
 
         FileInputFormat.addInputPath(job,input);
         FileOutputFormat.setOutputPath(job,output);
@@ -107,9 +109,9 @@ public class AnalysizeJob {
         return job;
     }
 
-    public static Path runConsumePlaceCombineJob(Configuration baseConf, Path input, Path consumePlace) throws IOException, ClassNotFoundException, InterruptedException {
+    public static Path runconsumePlaceVectorJob(Configuration baseConf, Path input, Path consumePlace) throws IOException, ClassNotFoundException, InterruptedException {
 
-        Job job = consumePlaceCombineJob(baseConf, input, consumePlace);
+        Job job = consumePlaceVectorJob(baseConf, input, consumePlace);
 
         boolean success = job.waitForCompletion(true);
 
@@ -119,4 +121,85 @@ public class AnalysizeJob {
         }
         return FileOutputFormat.getOutputPath(job);
     }
-}
+
+    public static Job combineBasicInfoJob(Configuration baseConf, Path features, Path graduateStudentsBasicInfo, Path graduateStudentsBasicInfoMap) throws IOException {
+
+        Job job = Job.getInstance(baseConf);
+
+        job.setJarByClass(AnalysizeJob.class);
+
+        job.addCacheFile(graduateStudentsBasicInfo.toUri());
+        job.addCacheFile(graduateStudentsBasicInfoMap.toUri());
+
+        job.setInputFormatClass(SequenceFileInputFormat.class);
+        job.setOutputFormatClass(SequenceFileOutputFormat.class);
+
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(VectorWritable.class);
+
+        job.setMapperClass(CombineBasicInfo.CombineFeatureMapper.class);
+
+        Path output = new Path(features.getParent(), combineBasicInfoOutPut);
+        FileSystem.get(job.getConfiguration()).delete(output,true);
+
+        FileInputFormat.addInputPath(job, features);
+        FileOutputFormat.setOutputPath(job,output);
+
+        job.setNumReduceTasks(3);
+
+        return job;
+    }
+
+    public static Path runCombineBasicInfoJob(Configuration baseConf, Path features, Path graduateStudentsBasicInfo, Path graduateStudentsBasicInfoMap) throws IOException, ClassNotFoundException, InterruptedException {
+
+        Job job = combineBasicInfoJob(baseConf, features, graduateStudentsBasicInfo, graduateStudentsBasicInfoMap);
+        boolean success = job.waitForCompletion(true);
+
+        if(!success){
+            System.err.println("runCombineBasicInfoJob failed!");
+            System.exit(1);
+        }
+        return FileOutputFormat.getOutputPath(job);
+    }
+
+    public static Job uniqueKindJob(Configuration baseConf, Path input) throws IOException {
+
+        Job job = Job.getInstance(baseConf);
+        job.setJarByClass(AnalysizeJob.class);
+
+        job.setInputFormatClass(TextInputFormat.class);
+        job.setOutputFormatClass(TextOutputFormat.class);
+
+        job.setMapperClass(UniqueKindMR.UniqueKindMapper.class);
+        job.setReducerClass(UniqueKindMR.UniqueKindReducer.class);
+        job.setCombinerClass(UniqueKindMR.UniqueKindReducer.class);
+
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(NullWritable.class);
+
+        Path output = new Path(input.getParent(), uniqueKindPlace);
+        FileSystem.get(job.getConfiguration()).delete(output,true);
+        FileInputFormat.addInputPath(job, input);
+        FileOutputFormat.setOutputPath(job,output);
+
+        return job;
+    }
+
+    public static Path runUniqueKindJob(Configuration baseConf, Path input) throws IOException, ClassNotFoundException, InterruptedException {
+
+        Job job = uniqueKindJob(baseConf, input);
+
+        boolean success = job.waitForCompletion(true);
+
+        if(!success){
+            System.err.println("run UniqueKindJob Failed!");
+            System.exit(1);
+        }
+
+        return FileOutputFormat.getOutputPath(job);
+
+    }
+
+
+
+    }

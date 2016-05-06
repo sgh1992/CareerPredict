@@ -88,7 +88,6 @@ public class ConsumeForGraduatedStudents {
             else{
                 context.getCounter(MISSINGTransferPlace.MISSING_TRANSFER_PLACE).increment(1);
             }
-
         }
         public GraduateStudentsConsumeAndBasicInfoRecord graduateStudentsConsumeCombineBasicInfo(String studentID,Record consumeRecord,PlaceRecord placeRecord){
             GraduateStudentBasicRecord basicRecord = graduatesInfo.get(studentID);

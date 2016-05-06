@@ -101,7 +101,7 @@ public class GradeVector {
         job.setSortComparatorClass(SortByAllKey.class);
         job.setGroupingComparatorClass(GroupingByFirstKey.class);
 
-        job.setNumReduceTasks(4);//设置Reduce的个数有利于負載均衡!!!
+        job.setNumReduceTasks(3);//设置Reduce的个数有利于負載均衡!!!
 
         FileInputFormat.addInputPath(job,input);
         Path output = new Path(input.getParent(),GRADEVECTOR);

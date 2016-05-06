@@ -22,9 +22,8 @@ import java.io.IOException;
  */
 public class ConsumeJob {
 
-    public static Path runDeduplicationJob(Path input, Configuration baseConf) throws IOException, ClassNotFoundException, InterruptedException {
-        Configuration conf = new Configuration(baseConf);
-        Job job = Job.getInstance(conf);
+    public static Job deduplicationJob(Path input, Configuration baseConf) throws IOException, ClassNotFoundException, InterruptedException {
+        Job job = Job.getInstance(baseConf);
         job.setJarByClass(ConsumeJob.class);
 
         job.setInputFormatClass(TextInputFormat.class);
@@ -42,24 +41,30 @@ public class ConsumeJob {
 
         job.setNumReduceTasks(3);
 
-        FileInputFormat.addInputPath(job,input);
-        Path output = new Path(input.getParent(),Deduplication.DuOutPut);
-        FileSystem.get(conf).delete(output,true);
-        FileOutputFormat.setOutputPath(job,output);
+        FileInputFormat.addInputPath(job, input);
+        Path output = new Path(input.getParent(), Deduplication.DuOutPut);
+        FileSystem.get(job.getConfiguration()).delete(output, true);
+        FileOutputFormat.setOutputPath(job, output);
+
+        return job;
+    }
+
+    public static Path runDeduplicationJob(Path input, Configuration baseConf) throws IOException, ClassNotFoundException, InterruptedException {
+
+        Job job = deduplicationJob(input,baseConf);
 
         boolean success = job.waitForCompletion(true);
 
-        if(!success){
+        if (!success) {
             System.err.println("RunDeduplicationJob Failed!");
             System.exit(1);
         }
-        return output;
+        return FileOutputFormat.getOutputPath(job);
     }
 
-    public static Path runGraduateStudentsForConsumeAndBasicInfoJob(Path input,Path studentBasicInfo,Path placeTransfer,Configuration baseConf) throws IOException, ClassNotFoundException, InterruptedException {
+        public static Job graduateStudentsForConsumeAndBasicInfoJob(Path input, Path studentBasicInfo, Path placeTransfer, Configuration baseConf) throws IOException, ClassNotFoundException, InterruptedException {
 
-        Configuration conf = new Configuration(baseConf);
-        Job job = Job.getInstance(conf);
+        Job job = Job.getInstance(baseConf);
         job.setJarByClass(ConsumeJob.class);
         job.setMapperClass(ConsumeForGraduatedStudents.GraduatedStudentsMap.class);
         job.setOutputKeyClass(NullWritable.class);
@@ -73,17 +78,24 @@ public class ConsumeJob {
 
         job.setNumReduceTasks(3);
 
-        FileInputFormat.addInputPath(job,input);
-        Path output = new Path(input.getParent(),ConsumeForGraduatedStudents.GraduateStudentsForConsumeAndBasicinfo);
-        FileSystem.get(conf).delete(output,true);
-        FileOutputFormat.setOutputPath(job,output);
+        FileInputFormat.addInputPath(job, input);
+        Path output = new Path(input.getParent(), ConsumeForGraduatedStudents.GraduateStudentsForConsumeAndBasicinfo);
+        FileSystem.get(job.getConfiguration()).delete(output, true);
+        FileOutputFormat.setOutputPath(job, output);
 
+        return job;
+    }
+
+    public static Path runGraduateStudentsForConsumeAndBasicInfoJob(Path input, Path studentBasicInfo, Path placeTransfer, Configuration baseConf) throws IOException, ClassNotFoundException, InterruptedException {
+
+        Job job = graduateStudentsForConsumeAndBasicInfoJob(input, studentBasicInfo, placeTransfer, baseConf);
         boolean success = job.waitForCompletion(true);
-        while(!success){
+        while (!success) {
             System.err.println("GraduateStudentsForConsumeAndBasicInfoJob Failes!");
             System.exit(1);
         }
-        return output;
+        return FileOutputFormat.getOutputPath(job);
     }
-
 }
+
+

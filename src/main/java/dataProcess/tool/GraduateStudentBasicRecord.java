@@ -5,6 +5,10 @@ import org.apache.hadoop.io.Writable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * Created by sghipr on 11/04/16.
  * 学生基本信息记录.
@@ -54,7 +58,6 @@ public class GraduateStudentBasicRecord implements Writable{
         this.major = major;
         this.work = work;
     }
-
     /**
      * 深度复制
      * @param o
@@ -82,4 +85,15 @@ public class GraduateStudentBasicRecord implements Writable{
         major = in.readUTF();
         work = in.readUTF();
     }
+
+    public List<String> iteratorAttribute(){
+        List<String> attributeList = new ArrayList<>();
+        attributeList.add(gender);
+        attributeList.add(nation);
+        attributeList.add(political);
+        attributeList.add(college);
+        attributeList.add(major);
+        return attributeList;
+    }
+
 }

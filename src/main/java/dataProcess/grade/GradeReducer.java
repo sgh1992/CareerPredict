@@ -196,6 +196,7 @@ public class GradeReducer extends Reducer<IDClassNameRenovate, ValueRecord, Text
         for(Map.Entry<Integer,HashMap<String,Evaluator>> termEntry : evaluators.entrySet()){
             int term = termEntry.getKey();
             Evaluator termEvaluator = null;
+
             for(Map.Entry<String,Evaluator> classNatureEntry : termEntry.getValue().entrySet()){
                 String classNature = classNatureEntry.getKey();
                 Evaluator evaluator = classNatureEntry.getValue();

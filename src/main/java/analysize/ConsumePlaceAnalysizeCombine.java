@@ -2,6 +2,8 @@ package analysize;
 
 import analysize.record.KeyPair;
 import dataProcess.consume.record.Key;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -16,7 +18,9 @@ import org.apache.mahout.math.VectorWritable;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by sghipr on 5/5/16.
@@ -33,20 +37,33 @@ public class ConsumePlaceAnalysizeCombine {
             placeMap = getPlaceMap(context);
         }
 
-        public HashMap<String, Integer> getPlaceMap(Context context) throws IOException {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(FileSystem.get(context.getConfiguration()).open(new Path(context.getCacheFiles()[0]))));
-            String str = null;
-            int size = 0;
-            /**
-             * 获得每个地点的映射编号.
-             */
-            HashMap<String, Integer> placeMap = new HashMap<>();
-            while((str = reader.readLine()) != null){
-                String[] array = str.split("\t", -1);
-                placeMap.put(array[0], Integer.parseInt(array[1]));
-                size++;
+        public void listPaths(Configuration conf,Path path, List<Path> pathList) throws IOException {
+            for(FileStatus status : FileSystem.get(conf).listStatus(path)){
+                if(status.isDirectory())
+                    listPaths(conf,status.getPath(),pathList);
+                else
+                    pathList.add(status.getPath());
             }
-            reader.close();
+        }
+
+        public HashMap<String, Integer> getPlaceMap(Context context) throws IOException {
+
+            List<Path> paths = new ArrayList<>();
+            listPaths(context.getConfiguration(), new Path(context.getCacheFiles()[0]), paths);
+            BufferedReader reader = null;
+            for(Path path : paths){
+                reader = new BufferedReader(new InputStreamReader(FileSystem.get(context.getConfiguration()).open(path)));
+                String str = null;
+                /**
+                 * 获得每个地点的映射编号.
+                 */
+                HashMap<String, Integer> placeMap = new HashMap<>();
+                //file text is a Set
+                while((str = reader.readLine()) != null){
+                    placeMap.put(str.trim(), placeMap.size());
+                }
+                reader.close();
+            }
             return placeMap;
         }
 
@@ -67,7 +84,7 @@ public class ConsumePlaceAnalysizeCombine {
 
     /**
      * 自定义partition操作.
-     *
+     *以KeyPair中的ID与place作为其partition的依据.
      */
     public static class ConsumePlaceAnalysizeCombinePartition extends Partitioner<KeyPair,VectorWritable>{
 
@@ -79,7 +96,8 @@ public class ConsumePlaceAnalysizeCombine {
 
     /**
      * 自定义group操作.
-     * 以keyPair中的ID与place作为其分组行为.
+     * 以keyPair中的ID作为其分组行为.
+     * 因为最终得到的是每一个学生的所有地点的Vector，这点要非常注意.
      */
     public static class ConsumePlaceAnalysizeCombineGroup extends WritableComparator{
 
@@ -91,14 +109,13 @@ public class ConsumePlaceAnalysizeCombine {
 
             KeyPair pair1 = (KeyPair)o1;
             KeyPair pair2 = (KeyPair)o2;
-
-            return pair1.getID().compareTo(pair2.getID()) == 0 ?
-                    pair1.getPlace().compareTo(pair2.getPlace()):pair1.getID().compareTo(pair2.getID());
+            return pair1.getID().compareTo(pair2.getID());
         }
     }
 
     /**
-     * 自定义排序操作.
+     * 自定义Sort操作.
+     * 分别以ID,Place,type顺序来进行排序.
      */
     public static class ConsumePlaceAnalysizeCombineSort extends WritableComparator{
 

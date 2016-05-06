@@ -10,7 +10,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
 
 import java.io.*;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * Created by sghipr on 11/04/16.
@@ -21,7 +21,12 @@ public class Tool {
     /**
      * 毕业学生的基本信息数据.
      */
-    private static String graduateWorkSequenceFileOutPut = "graduateStudentsBasicSequenceFile";
+    private static String graduateStudentsSequenceFile = "graduateStudentsBasicSequenceFile";
+
+    /**
+     * 将毕业学生的离散型属性进行dummy code.将之转换为0,1变量.
+     */
+    private static String graduateStudentsBasicMap = "graduateStudentsBasicMap";
 
     /**
      * 消费地点的划分
@@ -70,6 +75,21 @@ public class Tool {
             return validate;
         }
 
+
+        /**
+         * 返回学生的 nation,gender,political,major,college 的信息.
+         * 即在校时的个人属性信息
+         * @return
+         */
+        public Iterable<String> personalInfo(){
+            List<String> infos = new ArrayList<>();
+            infos.add(nation);
+            infos.add(gender);
+            infos.add(political);
+            infos.add(major);
+            infos.add(college);
+            return infos;
+        }
         public String toString(){
 
             return new StringBuilder().append(year).append(",").append(studentID).append(",").append(nation).append(",")
@@ -93,7 +113,7 @@ public class Tool {
      */
     public Path getGraduateStudentsBasicPath(String file){
         Path path = new Path(file);
-        Path output = new Path(path.getParent(),graduateWorkSequenceFileOutPut);
+        Path output = new Path(path.getParent(),graduateStudentsSequenceFile);
         try {
             FSDataInputStream inputStream = FileSystem.get(conf).open(path);
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -114,7 +134,42 @@ public class Tool {
         return output;
     }
 
+    /**
+     * 毕业学生的基本信息映射.
+     * 主要用于dummy code.
+     * @param workinfoFile
+     * @return
+     * @throws IOException
+     */
+    public Path graduateStudentsBasicMap(String workinfoFile) throws IOException {
+        HashMap<String, Integer> basicMap = studentBasicMap(workinfoFile);
+        Path basicMapPath = new Path(new Path(workinfoFile).getParent(),graduateStudentsBasicMap);
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(FileSystem.get(conf).create(basicMapPath)));
+        for(Map.Entry<String, Integer> entry : basicMap.entrySet()){
+            writer.write(entry.getKey() + "\t" + entry.getValue());
+            writer.newLine();
+        }
+        writer.close();
+        return basicMapPath;
+    }
 
+    public HashMap<String, Integer> studentBasicMap(String workInfoFile) throws IOException {
+        Path input = new Path(workInfoFile);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(FileSystem.get(conf).open(input)));
+        String str = null;
+        HashMap<String,Integer> basicMap = new HashMap<>();
+        while((str = reader.readLine()) != null){
+            BasicRecord basicRecord = new BasicRecord(str);
+            if(basicRecord.isValidate()){
+                for(String info : basicRecord.personalInfo()){
+                    if(!basicMap.containsKey(info))
+                        basicMap.put(info, basicMap.size());
+                }
+            }
+        }
+        reader.close();
+        return basicMap;
+    }
 
     /**
      * 将消费数据的地址转换为一系列可以理解的数据，并初步对消费地点进行分组.

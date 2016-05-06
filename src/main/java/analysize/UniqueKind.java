@@ -21,6 +21,7 @@ import java.util.concurrent.Callable;
  *
  *主要是用来遍历整个文件找到其唯一的kind值.
  * 这里使用一个单独的线程来运行.
+ * 其实这里并一定需要
  */
 public class UniqueKind implements Callable<Path>{
 
