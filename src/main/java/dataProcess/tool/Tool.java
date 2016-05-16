@@ -1,10 +1,7 @@
 package dataProcess.tool;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.*;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Writable;
@@ -577,6 +574,15 @@ public class Tool {
             System.err.println("Missing \t" + place);
         }
         return transferAndClass;
+    }
+
+    public void iteratePath(Path root, List<Path> paths) throws IOException {
+        for(FileStatus status : FileSystem.get(conf).listStatus(root)){
+            if(status.isDirectory())
+                iteratePath(status.getPath() ,paths);
+            else
+                paths.add(status.getPath());
+        }
     }
 
 }

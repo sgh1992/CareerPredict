@@ -1,6 +1,7 @@
 package analysize.record;
 
 import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -77,4 +78,16 @@ public class KeyPair implements WritableComparable<KeyPair>{
     public String toString(){
         return new StringBuilder().append(type).append("\t").append(ID).append("\t").append(place).toString();
     }
+
+    /**
+     * 需要注意,默认的partitioner是hashPartitioner.
+     * (key.hashCode() & Integer.MaxValue) % numPartitioner;
+     * 即每个key都应该有一个hashCode函数.
+     * @return
+     */
+    public int hashCode(){
+        return ID.hashCode() + place.hashCode() + type.hashCode() * 127;
+    }
+
+
 }

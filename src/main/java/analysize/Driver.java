@@ -5,9 +5,13 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
@@ -73,20 +77,21 @@ public class Driver extends Configured implements Tool{
 
         dataProcess.tool.Tool tool = new dataProcess.tool.Tool(conf);
         Path duOut = new Path("/user/sghipr/careerPredict/duOutPut");
-
+        Path graduateStudentsBasicInfo = tool.getGraduateStudentsBasicPath(dataProcess.consume.Driver.GraduateStudentsBasicInfo);
+        Path graduateStudentsBasicMap = tool.graduateStudentsBasicMap(dataProcess.consume.Driver.GraduateStudentsBasicInfo);
         //Job
-        Job graduateStudentConsumeAndBasicInfoJob = ConsumeJob.graduateStudentsForConsumeAndBasicInfoJob(duOut,tool.getGraduateStudentsBasicPath(dataProcess.consume.Driver.GraduateStudentsBasicInfo),tool.consumePlaceTransfer(dataProcess.consume.Driver.ConsumePlace),conf);
+        Job graduateStudentConsumeAndBasicInfoJob = ConsumeJob.graduateStudentsForConsumeAndBasicInfoJob(duOut,graduateStudentsBasicInfo,tool.consumePlaceTransfer(dataProcess.consume.Driver.ConsumePlace),conf);
         Job consumeAmountAndCountAnalysizeJob = AnalysizeJob.consumePlaceAnalysizeJob(conf, FileOutputFormat.getOutputPath(graduateStudentConsumeAndBasicInfoJob), startTime,endTime, rankYear);
         Job uniqueKindJob = AnalysizeJob.uniqueKindJob(conf,FileOutputFormat.getOutputPath(graduateStudentConsumeAndBasicInfoJob));
         Job consumeVectorJob = AnalysizeJob.consumePlaceVectorJob(conf, FileOutputFormat.getOutputPath(consumeAmountAndCountAnalysizeJob), FileOutputFormat.getOutputPath(uniqueKindJob));
-        Job basicInfoCombineJob = AnalysizeJob.combineBasicInfoJob(conf,FileOutputFormat.getOutputPath(consumeVectorJob),tool.getGraduateStudentsBasicPath(dataProcess.consume.Driver.GraduateStudentsBasicInfo), tool.graduateStudentsBasicMap(dataProcess.consume.Driver.GraduateStudentsBasicInfo));
+        Job basicInfoCombineJob = AnalysizeJob.combineBasicInfoJob(conf,FileOutputFormat.getOutputPath(consumeVectorJob),graduateStudentsBasicInfo, graduateStudentsBasicMap);
 
         //Control Job
         ControlledJob cGraduateStudentConsumeAndBasicInfoJob = new ControlledJob(graduateStudentConsumeAndBasicInfoJob,null);
         ControlledJob cConsumeAmountAndCountAnalysizeJob = new ControlledJob(consumeAmountAndCountAnalysizeJob, null);
         ControlledJob cUniqueKindJob = new ControlledJob(uniqueKindJob,null);
         ControlledJob cConsumeVectorJob = new ControlledJob(consumeVectorJob,null);
-        ControlledJob cBasicInfoCombineJob = new ControlledJob(basicInfoCombineJob,null);
+       ControlledJob cBasicInfoCombineJob = new ControlledJob(basicInfoCombineJob,null);
 
         //dependnecy
         cConsumeAmountAndCountAnalysizeJob.addDependingJob(cGraduateStudentConsumeAndBasicInfoJob);
@@ -97,6 +102,7 @@ public class Driver extends Configured implements Tool{
 
         cBasicInfoCombineJob.addDependingJob(cConsumeVectorJob);
 
+        //Running
         JobControl jobControl = new JobControl("consumeBasicInfo_PlaceVector_CombineBasic");
         jobControl.addJob(cGraduateStudentConsumeAndBasicInfoJob);
         jobControl.addJob(cConsumeAmountAndCountAnalysizeJob);

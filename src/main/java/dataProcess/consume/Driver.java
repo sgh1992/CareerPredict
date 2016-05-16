@@ -26,7 +26,7 @@ public class Driver extends Configured implements Tool {
      * 使用默认的hdfs路径,因此不需要指明主机号与端口号.
      */
     public static String ORIGIALCONSUMEDATA = "/user/sghipr/careerPredict/consumeData.csv";
-    public static String GraduateStudentsBasicInfo = "/user/sghipr/careerPredict/graduateworkinfo.csv";
+    public static String GraduateStudentsBasicInfo = "/home/sghipr/careerPredict/graduateworkinfo.csv";
     public static String ConsumePlace = "/user/sghipr/careerPredict/consumePlace.csv";
 
     public int run(String[] args) throws Exception {

@@ -110,8 +110,6 @@ public class ConsumePlaceAnalysize {
             }
             context.write(key,new VectorWritable(vector));
         }
-
-
     }
 
 }

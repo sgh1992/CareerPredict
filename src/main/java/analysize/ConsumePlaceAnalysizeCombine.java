@@ -51,13 +51,13 @@ public class ConsumePlaceAnalysizeCombine {
             List<Path> paths = new ArrayList<>();
             listPaths(context.getConfiguration(), new Path(context.getCacheFiles()[0]), paths);
             BufferedReader reader = null;
+            /**
+             * 获得每个地点的映射编号.
+             */
+            HashMap<String, Integer> placeMap = new HashMap<>();
             for(Path path : paths){
                 reader = new BufferedReader(new InputStreamReader(FileSystem.get(context.getConfiguration()).open(path)));
                 String str = null;
-                /**
-                 * 获得每个地点的映射编号.
-                 */
-                HashMap<String, Integer> placeMap = new HashMap<>();
                 //file text is a Set
                 while((str = reader.readLine()) != null){
                     placeMap.put(str.trim(), placeMap.size());
@@ -67,6 +67,14 @@ public class ConsumePlaceAnalysizeCombine {
             return placeMap;
         }
 
+        /**
+         * 这里有个疑问,即经过分组之后的key，并不仅仅只有唯一的key值.每次对values进行迭代之后，它的key值都将随之改变.
+         * @param keyPair
+         * @param values
+         * @param context
+         * @throws IOException
+         * @throws InterruptedException
+         */
         public void reduce(KeyPair keyPair,Iterable<VectorWritable> values, Context context) throws IOException, InterruptedException {
 
             Vector placeVector = new DenseVector(placeMap.size());
@@ -75,7 +83,7 @@ public class ConsumePlaceAnalysizeCombine {
             for(VectorWritable vectorWritable : values){
                 count++;
                 if(count % 2 == 0)
-                    placeVector.set(placeMap.get(keyPair.getPlace()),vectorWritable.get().zSum()/before);
+                    placeVector.set(placeMap.get(keyPair.getPlace()),before/vectorWritable.get().zSum());// amount/days
                 before = vectorWritable.get().zSum();
             }
             context.write(new Text(keyPair.getID()),new VectorWritable(placeVector));
@@ -84,13 +92,12 @@ public class ConsumePlaceAnalysizeCombine {
 
     /**
      * 自定义partition操作.
-     *以KeyPair中的ID与place作为其partition的依据.
+     *以KeyPair中的ID作为其partition的依据.
      */
     public static class ConsumePlaceAnalysizeCombinePartition extends Partitioner<KeyPair,VectorWritable>{
-
         @Override
         public int getPartition(KeyPair keyPair, VectorWritable vectorWritable, int numPartitions) {
-            return Math.abs(keyPair.getID().hashCode() * 127 + keyPair.getPlace().hashCode()) % numPartitions;
+            return Math.abs(keyPair.getID().hashCode() * 127) % numPartitions;
         }
     }
 
@@ -106,7 +113,6 @@ public class ConsumePlaceAnalysizeCombine {
         }
 
         public int compare(WritableComparable o1, WritableComparable o2){
-
             KeyPair pair1 = (KeyPair)o1;
             KeyPair pair2 = (KeyPair)o2;
             return pair1.getID().compareTo(pair2.getID());

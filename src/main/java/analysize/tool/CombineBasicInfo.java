@@ -9,6 +9,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
@@ -39,7 +40,6 @@ public class CombineBasicInfo {
         }
 
         public HashMap<String, GraduateStudentBasicRecord> getGraduateStudentBasicRecordInfo(Context context, Path graduateBasicInfoRecord) throws IOException {
-            basicInfoSize = 0; //initalize
             HashMap<String,GraduateStudentBasicRecord> graduateStudentsBasicMap = new HashMap<>();
             SequenceFile.Reader reader = new SequenceFile.Reader(FileSystem.get(context.getConfiguration()),graduateBasicInfoRecord, context.getConfiguration());
             NullWritable key = NullWritable.get();
@@ -72,17 +72,16 @@ public class CombineBasicInfo {
                 Vector combineVector = new DenseVector(size);
 
                 //features
-                for(Vector.Element element : features.get().all())
-                    combineVector.set(element.index(),element.get());
+                combineVector.viewPart(0,featureSize).assign(features.get());
 
                 //basicInfos
                 List<String> personalInfos = graduateStudentBasicRecords.get(ID.toString()).iteratorAttribute();
                 for(int i = 0; i < personalInfos.size(); i++){
                     if(graduateStudentsBasicInfoMap.containsKey(personalInfos.get(i))){
-                        combineVector.set(i + graduateStudentsBasicInfoMap.get(personalInfos.get(i)), 1);
+                        combineVector.set(featureSize + graduateStudentsBasicInfoMap.get(personalInfos.get(i)), 1.0);
                     }
                     else{
-                        combineVector.set(i + graduateStudentsBasicInfoMap.get("其它少数民族"), 1);
+                        combineVector.set(featureSize + graduateStudentsBasicInfoMap.get("其它少数民族"), 1);
                     }
                 }
                 context.write(ID, new VectorWritable(combineVector));

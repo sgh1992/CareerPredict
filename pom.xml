@@ -67,7 +67,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>analysize.Driver</mainClass>
+                            <mainClass>dataMining.Driver</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

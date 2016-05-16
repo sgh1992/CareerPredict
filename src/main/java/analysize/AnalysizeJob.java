@@ -29,11 +29,16 @@ public class AnalysizeJob {
      **/
     public static String consumePlaceAnalysizeOutPut = "placeAmountAndCountOutPut";
 
-
     /**
      * 存放计算的每个学生在每个地点平均每天的消费情况.
+     * 每个学生多个Vector
      **/
     public static String consumePlaceVectorOutPut = "consumePlaceVector";
+
+    /**
+     * 每个学生一个Vector
+     */
+    public static String consumePlaceVectorMerge = "consumePlaceVectorMerge";
 
     public static String uniqueKindPlace = "uniqueKind";
 
@@ -117,6 +122,44 @@ public class AnalysizeJob {
 
         if(!success){
             System.err.println("runConsumePlaceCombineJob failed!");
+            System.exit(1);
+        }
+        return FileOutputFormat.getOutputPath(job);
+    }
+
+    public static Job consumePlaceVectorMergeJob(Configuration baseConf, Path input) throws IOException {
+
+        Job job = Job.getInstance(baseConf);
+        job.setJarByClass(AnalysizeJob.class);
+
+        job.setInputFormatClass(SequenceFileInputFormat.class);
+        job.setOutputFormatClass(SequenceFileOutputFormat.class);
+
+        job.setMapOutputKeyClass(Text.class);
+        job.setMapOutputValueClass(VectorWritable.class);
+
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(VectorWritable.class);
+
+        job.setReducerClass(ConsumePlaceVetorMerge.ConsumePlaceVectorMergeReducer.class);
+        job.setCombinerClass(ConsumePlaceVetorMerge.ConsumePlaceVectorMergeReducer.class);
+
+        Path output = new Path(input.getParent(), consumePlaceVectorMerge);
+        FileSystem.get(job.getConfiguration()).delete(output,true);
+        FileInputFormat.addInputPath(job, input);
+        FileOutputFormat.setOutputPath(job,output);
+
+        return job;
+    }
+
+    public static Path runConsumePlaceVectorMergeJob(Configuration baseConf, Path input) throws IOException, ClassNotFoundException, InterruptedException {
+
+        Job job = consumePlaceVectorMergeJob(baseConf, input);
+
+        boolean success = job.waitForCompletion(true);
+
+        if(!success){
+            System.err.println("run ConsumePlaceVectorMergeJob failed!");
             System.exit(1);
         }
         return FileOutputFormat.getOutputPath(job);
